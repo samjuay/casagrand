@@ -1,0 +1,342 @@
+import React, { useState, useEffect } from "react";
+import { User, Lead, LeadStatus, LeadQuality } from "./types";
+import { MOCK_USERS, MOCK_LEADS } from "./mockData";
+import RoleSwitcher from "./components/RoleSwitcher";
+import Header from "./components/Header";
+import Sidebar, { getNavigationTabs } from "./components/Sidebar";
+import BottomNav from "./components/BottomNav";
+import DashboardView from "./components/DashboardView";
+import LeadsView from "./components/LeadsView";
+import ProjectsView from "./components/ProjectsView";
+import TeamView from "./components/TeamView";
+import ChannelPartnersView from "./components/ChannelPartnersView";
+import ContactBuilder from "./components/ContactBuilder";
+import ProfileView from "./components/ProfileView";
+import AddLeadModal from "./components/AddLeadModal";
+import { AlertCircle, CheckCircle, HelpCircle, ShieldCheck, X } from "lucide-react";
+
+export default function App() {
+  // Hydrate users state from localStorage or mockData
+  const [users, setUsers] = useState<User[]>(() => {
+    const saved = localStorage.getItem("CG_CRM_USERS");
+    return saved ? JSON.parse(saved) : MOCK_USERS;
+  });
+
+  // Hydrate leads state from localStorage or mockData
+  const [leads, setLeads] = useState<Lead[]>(() => {
+    const saved = localStorage.getItem("CG_CRM_LEADS");
+    return saved ? JSON.parse(saved) : MOCK_LEADS;
+  });
+
+  // Hydrate logged-in userId state from localStorage or default USR-001 (Builder Admin)
+  const [currentUserId, setCurrentUserId] = useState<string>(() => {
+    return localStorage.getItem("CG_CRM_CURRENT_USER_ID") || "USR-001";
+  });
+
+  // Current logged in user object
+  const currentUser = users.find((u) => u.id === currentUserId) || users[0];
+
+  // Active view tab state (default to Dashboard)
+  const [activeTab, setActiveTab] = useState<string>("Dashboard");
+
+  // Dynamic filter state passed from Dashboard stat cards to Leads view
+  const [initialStatusFilter, setInitialStatusFilter] = useState<string | null>(null);
+  const [initialQualityFilter, setInitialQualityFilter] = useState<string | null>(null);
+
+  // Modal & Mobile layout toggles
+  const [showAddLeadModal, setShowAddLeadModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Sync state changes with local storage for robust persistence
+  useEffect(() => {
+    localStorage.setItem("CG_CRM_USERS", JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    localStorage.setItem("CG_CRM_LEADS", JSON.stringify(leads));
+  }, [leads]);
+
+  useEffect(() => {
+    localStorage.setItem("CG_CRM_CURRENT_USER_ID", currentUserId);
+  }, [currentUserId]);
+
+  // Handle active tab validation when roles are switched
+  const handleUserChange = (user: User) => {
+    setCurrentUserId(user.id);
+    setMobileMenuOpen(false);
+
+    // Get the valid tabs list for the newly switched role
+    const allowedTabs = getNavigationTabs(user.role).map((t) => t.name);
+
+    // If activeTab is not permitted for the new role, redirect to Dashboard
+    if (allowedTabs.includes("Dashboard")) {
+      setActiveTab("Dashboard");
+    } else if (allowedTabs.length > 0) {
+      setActiveTab(allowedTabs[0]);
+    }
+  };
+
+  // Callback to set specific filters from Dashboard stat cards
+  const handleSetLeadFilter = (status: string | null, quality: string | null) => {
+    setInitialStatusFilter(status);
+    setInitialQualityFilter(quality);
+  };
+
+  const handleClearInitialFilters = () => {
+    setInitialStatusFilter(null);
+    setInitialQualityFilter(null);
+  };
+
+  // Add lead handler
+  const handleAddLead = (newLead: Lead) => {
+    setLeads([newLead, ...leads]);
+  };
+
+  // Update lead handler (status progression or details edit)
+  const handleUpdateLead = (updatedLead: Lead) => {
+    setLeads(leads.map((l) => (l.id === updatedLead.id ? updatedLead : l)));
+  };
+
+  // Sales Executive: Claim Lead Action
+  const handleClaimLead = (leadId: string) => {
+    const targetLead = leads.find((l) => l.id === leadId);
+    if (!targetLead) return;
+
+    const dateToday = new Date().toISOString().split("T")[0];
+    const updated: Lead = {
+      ...targetLead,
+      claimedById: currentUser.id,
+      claimedBy: currentUser.name,
+      status: "Assigned To Sales Executive",
+      statusUpdatedDate: dateToday,
+      history: [
+        ...targetLead.history,
+        {
+          id: `H-CLM-${Math.random().toString(36).substr(2, 5)}`,
+          status: "Assigned To Sales Executive",
+          updatedAt: dateToday,
+          updatedBy: `${currentUser.role} - ${currentUser.name}`,
+          notes: "Lead accepted and claimed by designated Sales Executive.",
+        },
+      ],
+    };
+
+    handleUpdateLead(updated);
+    alert("Lead claimed successfully. You are now the assigned Sales Executive.");
+  };
+
+  // Sales Executive: Reject Lead Action
+  const handleRejectLead = (leadId: string) => {
+    const targetLead = leads.find((l) => l.id === leadId);
+    if (!targetLead) return;
+
+    const dateToday = new Date().toISOString().split("T")[0];
+    const updated: Lead = {
+      ...targetLead,
+      claimedById: null,
+      claimedBy: null,
+      status: "Visit Confirmed", // revert to visit confirmed for receptionist to assign someone else
+      statusUpdatedDate: dateToday,
+      history: [
+        ...targetLead.history,
+        {
+          id: `H-REJ-${Math.random().toString(36).substr(2, 5)}`,
+          status: "Visit Confirmed",
+          updatedAt: dateToday,
+          updatedBy: `${currentUser.role} - ${currentUser.name}`,
+          notes: "Lead assignment rejected by executive. Reverted to Visit Confirmed.",
+        },
+      ],
+    };
+
+    handleUpdateLead(updated);
+    alert("Assignment rejected. Lead is now back in the reception queue for re-assignment.");
+  };
+
+  // Logout/Reset back to Role Switcher panel
+  const handleLogout = () => {
+    alert("You have logged out from your current role session.");
+    // set to builder admin by default for easy switching
+    setCurrentUserId("USR-001");
+    setActiveTab("Dashboard");
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans overflow-x-hidden select-none">
+      
+      {/* Simulation/Review Mode Ribbon */}
+      <RoleSwitcher
+        users={users}
+        currentUser={currentUser}
+        onUserChange={handleUserChange}
+      />
+
+      {/* Main Corporate Header */}
+      <Header
+        currentUser={currentUser}
+        onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+      />
+
+      {/* Center Layout Panel */}
+      <div className="flex flex-1 relative min-h-0">
+        
+        {/* Left Sidebar (Desktop Viewport) */}
+        <Sidebar
+          currentUser={currentUser}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            setMobileMenuOpen(false);
+          }}
+          onLogout={handleLogout}
+          leadsCount={
+            currentUser.role === "FoS"
+              ? leads.filter((l) => l.createdBy === currentUser.name).length
+              : currentUser.role === "Sales Executive"
+              ? leads.filter((l) => l.claimedById === currentUser.id).length
+              : leads.length
+          }
+        />
+
+        {/* Mobile Hamburger Navigation Menu Panel (Overlay style) */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 md:hidden flex">
+            {/* Dark background clickout */}
+            <div
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs"
+              onClick={() => setMobileMenuOpen(false)}
+            ></div>
+
+            {/* Sidebar content container */}
+            <div className="relative w-64 bg-slate-950 text-slate-300 flex flex-col h-full shadow-2xl z-10 p-5 text-left animate-slide-in">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                <span className="font-extrabold text-white text-base tracking-tight">Navigation</span>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-1 hover:bg-slate-800 rounded-lg text-slate-400"
+                  title="Close Menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Navigation list */}
+              <nav className="flex-1 space-y-1.5">
+                {getNavigationTabs(currentUser.role).map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.name;
+
+                  return (
+                    <button
+                      key={tab.name}
+                      onClick={() => {
+                        setActiveTab(tab.name);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                        isActive
+                          ? "bg-amber-500 text-slate-950 shadow-md"
+                          : "text-slate-400 hover:text-white hover:bg-slate-900"
+                      }`}
+                    >
+                      <Icon className="w-4.5 h-4.5" />
+                      <span>{tab.name}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* Switch Account */}
+              <div className="border-t border-slate-800 pt-4">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-rose-400 hover:bg-rose-950/20 font-bold"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Logout / Reset Session</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Primary Content Area Container */}
+        <main
+          id="main-app-content"
+          className="flex-1 overflow-y-auto px-4 py-6 md:p-8 max-w-7xl mx-auto w-full pb-20 md:pb-8 flex flex-col"
+        >
+          {/* Dynamic Tab Renderer */}
+          <div className="flex-1">
+            {activeTab === "Dashboard" && (
+              <DashboardView
+                leads={leads}
+                currentUser={currentUser}
+                users={users}
+                onAddLeadClick={() => setShowAddLeadModal(true)}
+                onTabChange={setActiveTab}
+                onSetLeadFilter={handleSetLeadFilter}
+                onClaimLead={handleClaimLead}
+                onRejectLead={handleRejectLead}
+              />
+            )}
+
+            {(activeTab === "Leads" || activeTab === "Clients") && (
+              <LeadsView
+                leads={leads}
+                currentUser={currentUser}
+                users={users}
+                onUpdateLead={handleUpdateLead}
+                onAddLeadClick={() => setShowAddLeadModal(true)}
+                initialStatusFilter={initialStatusFilter}
+                initialQualityFilter={initialQualityFilter}
+                onClearInitialFilters={handleClearInitialFilters}
+              />
+            )}
+
+            {activeTab === "Projects" && <ProjectsView />}
+
+            {(activeTab === "FoS" || activeTab === "Sales Team" || activeTab === "Team") && (
+              <TeamView
+                users={users}
+                currentUser={currentUser}
+                onUpdateUsers={setUsers}
+              />
+            )}
+
+            {activeTab === "Channel Partners" && (
+              <ChannelPartnersView users={users} leads={leads} />
+            )}
+
+            {activeTab === "Contact Builder" && <ContactBuilder />}
+
+            {activeTab === "Profile" && (
+              <ProfileView currentUser={currentUser} onLogout={handleLogout} />
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Sticky Bottom Navigation (Mobile Viewports Only) */}
+      <BottomNav
+        currentUser={currentUser}
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          setActiveTab(tab);
+          setMobileMenuOpen(false);
+        }}
+      />
+
+      {/* Universal Add Lead Modal Popup Form */}
+      {showAddLeadModal && (
+        <AddLeadModal
+          currentUser={currentUser}
+          onClose={() => setShowAddLeadModal(false)}
+          onAddLead={handleAddLead}
+        />
+      )}
+    </div>
+  );
+}
