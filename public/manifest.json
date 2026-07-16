@@ -76,5 +76,38 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "categories": ["business", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Sourcing Dashboard",
+      "short_name": "Sourcing",
+      "description": "View and manage cold sourced leads",
+      "url": "/?tab=Sourcing%20Agency",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Check-in Desk",
+      "short_name": "Check-ins",
+      "description": "Process physical lead check-ins",
+      "url": "/?tab=Receptionist",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.jpg",
+      "sizes": "1080x1920",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Casagrand CRM Mobile Portal"
+    },
+    {
+      "src": "/screenshot-desktop.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Casagrand CRM Desktop Hub"
+    }
   ]
 }

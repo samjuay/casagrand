@@ -1,4 +1,4 @@
-const CACHE_NAME = "casagrand-crm-v2";
+const CACHE_NAME = "casagrand-crm-v3";
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",
@@ -16,7 +16,9 @@ const ASSETS_TO_CACHE = [
   "/icon-384x384.png",
   "/icon-512x512.png",
   "/icon-maskable.png",
-  "/apple-touch-icon.png"
+  "/apple-touch-icon.png",
+  "/screenshot-mobile.jpg",
+  "/screenshot-desktop.jpg"
 ];
 
 // Install Event - cache all static assets
