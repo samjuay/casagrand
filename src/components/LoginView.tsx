@@ -6,9 +6,10 @@ import { Key, Mail, ShieldAlert, Sparkles, UserCheck, Eye, EyeOff, Lock, ArrowRi
 interface LoginViewProps {
   users: User[];
   onLogin: (user: User) => void;
+  onOpenInstall?: () => void;
 }
 
-export default function LoginView({ users, onLogin }: LoginViewProps) {
+export default function LoginView({ users, onLogin, onOpenInstall }: LoginViewProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -103,6 +104,18 @@ export default function LoginView({ users, onLogin }: LoginViewProps) {
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col justify-center items-center p-4 sm:p-6 md:p-8 font-sans relative overflow-hidden" id="login-container">
+      {/* Floating Install App Option */}
+      {onOpenInstall && (
+        <button
+          type="button"
+          onClick={onOpenInstall}
+          className="absolute top-4 right-4 z-20 px-3.5 py-2 bg-slate-800/80 hover:bg-slate-800 text-white border border-slate-700/60 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-lg backdrop-blur-xs hover:border-amber-500/50 hover:text-amber-300"
+        >
+          <Key className="w-3.5 h-3.5 text-amber-400 rotate-45" />
+          <span>Install CRM App</span>
+        </button>
+      )}
+
       {/* Subtle background matrix overlay */}
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
       

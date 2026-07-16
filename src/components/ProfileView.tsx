@@ -7,6 +7,7 @@ interface ProfileViewProps {
   onLogout: () => void;
   isInstallable?: boolean;
   onInstall?: () => void;
+  onOpenInstall?: () => void;
 }
 
 // Map permissions matrix text based on role
@@ -57,6 +58,7 @@ export default function ProfileView({
   onLogout,
   isInstallable = false,
   onInstall,
+  onOpenInstall,
 }: ProfileViewProps) {
   const permissions = getRolePermissions(currentUser.role);
 
@@ -145,25 +147,31 @@ export default function ProfileView({
       </div>
 
       {/* PWA Section */}
-      {isInstallable && onInstall && (
+      {!(() => {
+        try {
+          return window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
+        } catch {
+          return false;
+        }
+      })() && onOpenInstall && (
         <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-4 border border-slate-800">
           <div className="flex items-start gap-3">
             <span className="p-2 bg-blue-500/10 text-amber-400 border border-blue-500/20 rounded-xl shrink-0">
               <Sparkles className="w-5 h-5" />
             </span>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-white">Casagrand CRM Web App</h4>
+              <h4 className="text-sm font-bold text-white">Casagrand CRM Mobile App</h4>
               <p className="text-xs text-slate-400 leading-normal font-medium">
-                This workspace is fully installable as a Progressive Web App (PWA). Enjoy a clean desktop/mobile window layout, native device integrations, automatic safe area sizing, and lightning-fast offline cache access.
+                Add Casagrand CRM directly to your mobile home screen or computer desktop. Enjoy native safe-areas, high-contrast visual styles, and full standalone PWA performance.
               </p>
             </div>
           </div>
           <button
-            onClick={onInstall}
+            onClick={onOpenInstall}
             className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-black tracking-wider uppercase shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <Download className="w-4.5 h-4.5 text-slate-950" />
-            <span>Install Desktop or Mobile App</span>
+            <span>Open PWA App Installer</span>
           </button>
         </div>
       )}

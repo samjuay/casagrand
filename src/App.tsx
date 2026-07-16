@@ -14,6 +14,7 @@ import ContactBuilder from "./components/ContactBuilder";
 import ProfileView from "./components/ProfileView";
 import AddLeadModal from "./components/AddLeadModal";
 import LoginView from "./components/LoginView";
+import PWAInstallModal from "./components/PWAInstallModal";
 import { AlertCircle, CheckCircle, HelpCircle, ShieldCheck, X, Sparkles, Download } from "lucide-react";
 
 export default function App() {
@@ -59,6 +60,19 @@ export default function App() {
   const [isInstallDismissed, setIsInstallDismissed] = useState<boolean>(() => {
     return localStorage.getItem("CG_CRM_INSTALL_DISMISSED") === "true";
   });
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState<boolean>(false);
+
+  // Auto-trigger PWA modal on initial load with a clean experience delay
+  useEffect(() => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
+    const neverShow = localStorage.getItem("CG_CRM_INSTALL_MODAL_NEVER_SHOW") === "true";
+    if (!isStandalone && !neverShow) {
+      const timer = setTimeout(() => {
+        setIsInstallModalOpen(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Catch PWA beforeinstallprompt event
   useEffect(() => {
@@ -217,20 +231,29 @@ export default function App() {
   // If not logged in, render the login view instead of the system panels
   if (!isLoggedIn) {
     return (
-      <LoginView
-        users={users}
-        onLogin={(user) => {
-          setCurrentUserId(user.id);
-          setIsLoggedIn(true);
-          // Auto route to first allowed view tab for the role
-          const allowedTabs = getNavigationTabs(user.role).map((t) => t.name);
-          if (allowedTabs.includes("Dashboard")) {
-            setActiveTab("Dashboard");
-          } else if (allowedTabs.length > 0) {
-            setActiveTab(allowedTabs[0]);
-          }
-        }}
-      />
+      <>
+        <LoginView
+          users={users}
+          onLogin={(user) => {
+            setCurrentUserId(user.id);
+            setIsLoggedIn(true);
+            // Auto route to first allowed view tab for the role
+            const allowedTabs = getNavigationTabs(user.role).map((t) => t.name);
+            if (allowedTabs.includes("Dashboard")) {
+              setActiveTab("Dashboard");
+            } else if (allowedTabs.length > 0) {
+              setActiveTab(allowedTabs[0]);
+            }
+          }}
+          onOpenInstall={() => setIsInstallModalOpen(true)}
+        />
+        <PWAInstallModal
+          isOpen={isInstallModalOpen}
+          onClose={() => setIsInstallModalOpen(false)}
+          deferredPrompt={deferredPrompt}
+          onInstall={handleInstallApp}
+        />
+      </>
     );
   }
 
@@ -295,6 +318,7 @@ export default function App() {
           onLogout={handleLogout}
           isInstallable={isInstallable}
           onInstall={handleInstallApp}
+          onOpenInstall={() => setIsInstallModalOpen(true)}
           leadsCount={
             currentUser.role === "FoS"
               ? leads.filter((l) => l.createdBy === currentUser.name).length
@@ -440,6 +464,7 @@ export default function App() {
                 onLogout={handleLogout}
                 isInstallable={isInstallable}
                 onInstall={handleInstallApp}
+                onOpenInstall={() => setIsInstallModalOpen(true)}
               />
             )}
           </div>
@@ -464,6 +489,14 @@ export default function App() {
           onAddLead={handleAddLead}
         />
       )}
+
+      {/* PWA Install Assistant Modal */}
+      <PWAInstallModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+        deferredPrompt={deferredPrompt}
+        onInstall={handleInstallApp}
+      />
     </div>
   );
 }

@@ -23,6 +23,7 @@ interface SidebarProps {
   leadsCount?: number;
   isInstallable?: boolean;
   onInstall?: () => void;
+  onOpenInstall?: () => void;
 }
 
 // Helper to get role-specific navigation tabs
@@ -91,6 +92,7 @@ export default function Sidebar({
   leadsCount = 0,
   isInstallable = false,
   onInstall,
+  onOpenInstall,
 }: SidebarProps) {
   const tabs = getNavigationTabs(currentUser.role);
 
@@ -152,13 +154,19 @@ export default function Sidebar({
 
       {/* Footer / Logout */}
       <div className="p-4 border-t border-slate-100 shrink-0 bg-slate-50/50 space-y-2">
-        {isInstallable && onInstall && (
+        {onOpenInstall && !(() => {
+          try {
+            return window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any).standalone === true;
+          } catch {
+            return false;
+          }
+        })() && (
           <button
-            onClick={onInstall}
+            onClick={onOpenInstall}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 transition-colors duration-150 font-extrabold cursor-pointer uppercase tracking-wider"
           >
             <Download className="w-4 h-4 text-blue-600" />
-            <span className="font-display">Install Desktop App</span>
+            <span className="font-display">Install CRM App</span>
           </button>
         )}
         <button
