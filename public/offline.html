@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline | Casagrand CRM</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #0f172a;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+    .container {
+      max-width: 480px;
+      padding: 2rem;
+    }
+    .logo-container {
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin: 0 0 0.5rem 0;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0 0 2rem 0;
+    }
+    .retry-btn {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .retry-btn:hover {
+      background-color: #2563eb;
+    }
+    .indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #f5a623;
+      background-color: rgba(245, 166, 35, 0.1);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-container">
+      <!-- Golden upward arrow roof icon -->
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto;">
+        <g transform="translate(15, 15) scale(1)">
+          <path d="M 1.5 19 L 20 2.5 L 50 2.5 L 50 34.5 L 39 23.5 L 39 45 L 33 51 L 33 23.5 L 1.5 19 Z" fill="#F5A623" />
+          <path d="M 33 23.5 L 39 23.5 L 39 45 L 33 51 Z" fill="#D97706" opacity="0.85" />
+          <path d="M 20 2.5 L 50 2.5 L 50 15 L 20 15 Z" fill="#F59E0B" opacity="0.9" />
+        </g>
+      </svg>
+    </div>
+    
+    <div class="indicator">Offline Mode</div>
+    <h1>No Connection Found</h1>
+    <p>You are currently offline. Some features of the Casagrand Lead Journey CRM require an active network connection, but you can continue using previously cached workflows.</p>
+    
+    <button class="retry-btn" onclick="window.location.reload()">Check Connection</button>
+  </div>
+</body>
+</html>

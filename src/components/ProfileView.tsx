@@ -1,10 +1,12 @@
 import React from "react";
 import { User, UserRole } from "../types";
-import { User as UserIcon, Shield, Phone, Mail, FileText, CheckCircle2, AlertOctagon, LogOut } from "lucide-react";
+import { User as UserIcon, Shield, Phone, Mail, FileText, CheckCircle2, AlertOctagon, LogOut, Sparkles, Download } from "lucide-react";
 
 interface ProfileViewProps {
   currentUser: User;
   onLogout: () => void;
+  isInstallable?: boolean;
+  onInstall?: () => void;
 }
 
 // Map permissions matrix text based on role
@@ -50,7 +52,12 @@ function getRolePermissions(role: UserRole): { can: string[]; cannot: string[] }
   }
 }
 
-export default function ProfileView({ currentUser, onLogout }: ProfileViewProps) {
+export default function ProfileView({
+  currentUser,
+  onLogout,
+  isInstallable = false,
+  onInstall,
+}: ProfileViewProps) {
   const permissions = getRolePermissions(currentUser.role);
 
   return (
@@ -136,6 +143,30 @@ export default function ProfileView({ currentUser, onLogout }: ProfileViewProps)
           )}
         </div>
       </div>
+
+      {/* PWA Section */}
+      {isInstallable && onInstall && (
+        <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-4 border border-slate-800">
+          <div className="flex items-start gap-3">
+            <span className="p-2 bg-blue-500/10 text-amber-400 border border-blue-500/20 rounded-xl shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </span>
+            <div className="space-y-1">
+              <h4 className="text-sm font-bold text-white">Casagrand CRM Web App</h4>
+              <p className="text-xs text-slate-400 leading-normal font-medium">
+                This workspace is fully installable as a Progressive Web App (PWA). Enjoy a clean desktop/mobile window layout, native device integrations, automatic safe area sizing, and lightning-fast offline cache access.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onInstall}
+            className="w-full py-3 px-4 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-black tracking-wider uppercase shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Download className="w-4.5 h-4.5 text-slate-950" />
+            <span>Install Desktop or Mobile App</span>
+          </button>
+        </div>
+      )}
 
       {/* Switch User Session Button */}
       <button

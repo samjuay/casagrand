@@ -12,6 +12,7 @@ import {
   Briefcase,
   LogOut,
   ShieldAlert,
+  Download,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -20,6 +21,8 @@ interface SidebarProps {
   onTabChange: (tab: string) => void;
   onLogout: () => void;
   leadsCount?: number;
+  isInstallable?: boolean;
+  onInstall?: () => void;
 }
 
 // Helper to get role-specific navigation tabs
@@ -86,6 +89,8 @@ export default function Sidebar({
   onTabChange,
   onLogout,
   leadsCount = 0,
+  isInstallable = false,
+  onInstall,
 }: SidebarProps) {
   const tabs = getNavigationTabs(currentUser.role);
 
@@ -146,7 +151,16 @@ export default function Sidebar({
       </nav>
 
       {/* Footer / Logout */}
-      <div className="p-4 border-t border-slate-100 shrink-0 bg-slate-50/50">
+      <div className="p-4 border-t border-slate-100 shrink-0 bg-slate-50/50 space-y-2">
+        {isInstallable && onInstall && (
+          <button
+            onClick={onInstall}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 transition-colors duration-150 font-extrabold cursor-pointer uppercase tracking-wider"
+          >
+            <Download className="w-4 h-4 text-blue-600" />
+            <span className="font-display">Install Desktop App</span>
+          </button>
+        )}
         <button
           onClick={onLogout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors duration-150 font-bold cursor-pointer"

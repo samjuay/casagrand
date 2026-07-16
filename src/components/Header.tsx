@@ -1,6 +1,7 @@
 import React from "react";
 import { User } from "../types";
 import { Bell, Menu, UserCheck } from "lucide-react";
+import CasagrandLogo from "./CasagrandLogo";
 
 interface HeaderProps {
   currentUser: User;
@@ -24,21 +25,7 @@ export default function Header({ currentUser, onMobileMenuToggle }: HeaderProps)
         </button>
 
         {/* Casagrand Styled Logo */}
-        <div className="flex items-center gap-2">
-          {/* Logo Graphic (Geometric Balance Blue Square & White Circle) */}
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shrink-0 shadow-xs">
-            <div className="w-4 h-4 border-2 border-white rounded-full"></div>
-          </div>
-
-          <div className="flex flex-col text-left">
-            <span className="font-black text-blue-900 tracking-tight text-lg leading-none font-display">
-              CASAGRAND
-            </span>
-            <span className="text-[9px] text-slate-400 tracking-widest font-bold uppercase leading-none mt-1 font-display">
-              BUILDING ASPIRATIONS
-            </span>
-          </div>
-        </div>
+        <CasagrandLogo className="h-9 md:h-11" textColor="text-slate-800" subtextColor="text-slate-400" />
       </div>
 
       {/* User Information & Notification Dot */}
