@@ -1,8 +1,8 @@
-const CACHE_NAME = "casagrand-crm-v1";
+const CACHE_NAME = "casagrand-crm-v2";
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",
-  "/manifest.webmanifest",
+  "/manifest.json",
   "/offline.html",
   "/favicon.ico",
   "/favicon-16x16.png",
